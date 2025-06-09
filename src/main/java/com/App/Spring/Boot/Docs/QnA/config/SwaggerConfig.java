@@ -10,8 +10,8 @@ public class SwaggerConfig {
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("Spring Boot Docs QnA API")
+                        .title("Document Ingestion & Q&A API")
                         .version("1.0")
-                        .description("API documentation for Document Ingestion and Q&A Backend using Spring Boot and MySQL"));
+                        .description("Spring Boot API for document management and Q&A"));
     }
 }

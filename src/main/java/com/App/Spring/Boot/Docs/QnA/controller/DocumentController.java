@@ -1,46 +1,30 @@
 package com.App.Spring.Boot.Docs.QnA.controller;
-
-import com.App.Spring.Boot.Docs.QnA.dto.DocumentResponse;
-import com.App.Spring.Boot.Docs.QnA.dto.DocumentUploadRequest;
+import com.App.Spring.Boot.Docs.QnA.dto.DocumentDTO;
+import com.App.Spring.Boot.Docs.QnA.entity.Document;
 import com.App.Spring.Boot.Docs.QnA.service.DocumentService;
-import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/documents")
-@RequiredArgsConstructor
 public class DocumentController {
-    private final DocumentService documentService;
-    private static final Logger logger = LoggerFactory.getLogger(DocumentController.class);
+    @Autowired
+    private DocumentService documentService;
 
-    @PostMapping("/upload")
-    public ResponseEntity<DocumentResponse> uploadDocument(@RequestBody DocumentUploadRequest request) {
-        logger.info("Uploading document: {}", request.getFilename());
-        DocumentResponse response = documentService.uploadDocument(request);
-        return ResponseEntity.ok(response);
-    }
-
-    @PostMapping("/batch")
-    public ResponseEntity<List<DocumentResponse>> batchUpload(@RequestBody List<DocumentUploadRequest> requests) {
-        logger.info("Batch uploading {} documents", requests.size());
-        List<DocumentResponse> responses = documentService.batchUpload(requests);
-        return ResponseEntity.ok(responses);
+    @PostMapping("/ingest")
+    public ResponseEntity<String> ingest(@RequestBody DocumentDTO dto) {
+        documentService.ingestDocument(dto);
+        return ResponseEntity.ok("Document ingestion started");
     }
 
     @GetMapping
-    public ResponseEntity<Page<DocumentResponse>> filterDocuments(
-            @RequestParam(required = false) String author,
-            @RequestParam(required = false) String type,
-            Pageable pageable
-    ) {
-        logger.info("Filtering documents by author: {}, type: {}", author, type);
-        Page<DocumentResponse> page = documentService.filterDocuments(author, type, pageable);
-        return ResponseEntity.ok(page);
+    public ResponseEntity<List<Document>> getDocuments(
+            @RequestParam String author,
+            @RequestParam String type,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(documentService.getDocuments(author, type, page, size));
     }
 }

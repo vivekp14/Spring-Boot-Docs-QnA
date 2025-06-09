@@ -1,5 +1,4 @@
 package com.App.Spring.Boot.Docs.QnA.repository;
-
 import com.App.Spring.Boot.Docs.QnA.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;

@@ -1,25 +1,14 @@
-package com.App.Spring.Boot.Docs.QnA.entity;
-import jakarta.persistence.*;
+package com.App.Spring.Boot.Docs.QnA.dto;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "documents")
-public class Document {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class DocumentDTO {
     private String title;
-    @Column(columnDefinition = "TEXT")
     private String content;
     private String author;
     private String type;
     private LocalDateTime createdAt;
-    @Column(columnDefinition = "tsvector")
-    private String searchVector;
 
     // Getters, setters, and constructors
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
     public String getContent() { return content; }
@@ -30,6 +19,4 @@ public class Document {
     public void setType(String type) { this.type = type; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
-    public String getSearchVector() { return searchVector; }
-    public void setSearchVector(String searchVector) { this.searchVector = searchVector; }
 }

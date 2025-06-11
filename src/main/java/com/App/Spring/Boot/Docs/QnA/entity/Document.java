@@ -1,7 +1,11 @@
 package com.App.Spring.Boot.Docs.QnA.entity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Set;
 
+/**
+ * Entity representing a document with metadata and full-text search capabilities.
+ */
 @Entity
 @Table(name = "documents")
 public class Document {
@@ -14,10 +18,14 @@ public class Document {
     private String author;
     private String type;
     private LocalDateTime createdAt;
+    @ElementCollection
+    @CollectionTable(name = "document_keywords", joinColumns = @JoinColumn(name = "document_id"))
+    @Column(name = "keyword")
+    private Set<String> keywords;
     @Column(columnDefinition = "tsvector")
     private String searchVector;
 
-    // Getters, setters, and constructors
+    // Getters, setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getTitle() { return title; }
@@ -30,6 +38,8 @@ public class Document {
     public void setType(String type) { this.type = type; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public Set<String> getKeywords() { return keywords; }
+    public void setKeywords(Set<String> keywords) { this.keywords = keywords; }
     public String getSearchVector() { return searchVector; }
     public void setSearchVector(String searchVector) { this.searchVector = searchVector; }
 }

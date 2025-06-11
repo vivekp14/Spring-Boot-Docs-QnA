@@ -2,6 +2,9 @@ package com.App.Spring.Boot.Docs.QnA.entity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+/**
+ * Entity for storing blacklisted JWT tokens.
+ */
 @Entity
 @Table(name = "token_blacklist")
 public class TokenBlacklist {
@@ -11,7 +14,7 @@ public class TokenBlacklist {
     private String token;
     private LocalDateTime blacklistedAt;
 
-    // Getters, setters, and constructors
+    // Getters, setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getToken() { return token; }

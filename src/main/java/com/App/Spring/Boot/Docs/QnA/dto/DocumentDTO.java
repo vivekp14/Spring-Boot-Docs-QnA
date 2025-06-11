@@ -1,14 +1,19 @@
 package com.App.Spring.Boot.Docs.QnA.dto;
 import java.time.LocalDateTime;
+import java.util.Set;
 
+/**
+ * DTO for document data transfer.
+ */
 public class DocumentDTO {
     private String title;
     private String content;
     private String author;
     private String type;
     private LocalDateTime createdAt;
+    private Set<String> keywords;
 
-    // Getters, setters, and constructors
+    // Getters, setters
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
     public String getContent() { return content; }
@@ -19,4 +24,6 @@ public class DocumentDTO {
     public void setType(String type) { this.type = type; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public Set<String> getKeywords() { return keywords; }
+    public void setKeywords(Set<String> keywords) { this.keywords = keywords; }
 }

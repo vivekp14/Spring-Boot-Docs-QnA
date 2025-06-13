@@ -15,26 +15,24 @@ import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.data.RepositoryItemWriter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
-/**
- * Configuration for Spring Batch to process large document uploads.
- */
 @Configuration
 public class BatchConfig {
     private static final Logger logger = LoggerFactory.getLogger(BatchConfig.class);
 
-    @Autowired
-    private JobRepository jobRepository;
+    private final JobRepository jobRepository;
+    private final PlatformTransactionManager transactionManager;
+    private final DocumentRepository documentRepository;
 
-    @Autowired
-    private PlatformTransactionManager transactionManager;
-
-    @Autowired
-    private DocumentRepository documentRepository;
+    public BatchConfig(JobRepository jobRepository, PlatformTransactionManager transactionManager,
+                       DocumentRepository documentRepository) {
+        this.jobRepository = jobRepository;
+        this.transactionManager = transactionManager;
+        this.documentRepository = documentRepository;
+    }
 
     @Bean
     public ItemReader<DocumentDTO> documentItemReader() {

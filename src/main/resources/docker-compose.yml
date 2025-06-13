@@ -1,21 +1,30 @@
 version: '3.8'
 services:
-  app:
-    build:
-      context: .
-      dockerfile: docker/Dockerfile
-    ports:
-      - "8080:8080"
-    depends_on:
-      - db
+  postgres:
+    image: postgres:16
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/docqa?useSSL=false&serverTimezone=UTC
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=Vipin@123
-  db:
-    image: mysql:8.0
-    environment:
-      - MYSQL_DATABASE=docqa
-      - MYSQL_ROOT_PASSWORD=Vipin@123
+      POSTGRES_DB: docqa
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
     ports:
-      - "3306:3306"
+      - "5432:5432"
+    volumes:
+      - ./initdb:/docker-entrypoint-initdb.d
+    networks:
+      - docqa-network
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - docqa-network
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+    networks:
+      - docqa-network
+networks:
+  docqa-network:
+    driver: bridge

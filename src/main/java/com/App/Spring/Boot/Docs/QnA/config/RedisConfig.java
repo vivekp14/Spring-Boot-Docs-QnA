@@ -6,9 +6,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-/**
- * Configuration for Redis caching.
- */
 @Configuration
 public class RedisConfig {
     @Bean

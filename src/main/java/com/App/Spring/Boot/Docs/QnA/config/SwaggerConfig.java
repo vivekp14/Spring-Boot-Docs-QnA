@@ -10,8 +10,9 @@ public class SwaggerConfig {
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("Document Ingestion & Q&A API")
+                        .title("DocQA API")
                         .version("1.0")
-                        .description("Spring Boot API for document management and Q&A"));
+                        .description("API for document ingestion, retrieval, and Q&A"));
     }
 }
+

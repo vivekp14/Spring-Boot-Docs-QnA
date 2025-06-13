@@ -1,55 +1,66 @@
 package com.App.Spring.Boot.Docs.QnA.service;
-import com.App.Spring.Boot.Docs.QnA.dto.LoginRequest;
-import com.App.Spring.Boot.Docs.QnA.dto.LoginResponse;
+import com.App.Spring.Boot.Docs.QnA.dto.UserDTO;
 import com.App.Spring.Boot.Docs.QnA.entity.TokenBlacklist;
 import com.App.Spring.Boot.Docs.QnA.entity.User;
+import com.App.Spring.Boot.Docs.QnA.exception.ApiException;
 import com.App.Spring.Boot.Docs.QnA.repository.TokenBlacklistRepository;
 import com.App.Spring.Boot.Docs.QnA.repository.UserRepository;
-import com.App.Spring.Boot.Docs.QnA.security.JwtUtil;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.App.Spring.Boot.Docs.QnA.utils.JwtUtil;
+import jakarta.validation.Valid;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import java.time.LocalDateTime;
-import java.util.Set;
+import java.util.Arrays;
 
 @Service
 public class AuthService {
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-    @Autowired
-    private JwtUtil jwtUtil;
-    @Autowired
-    private TokenBlacklistRepository tokenBlacklistRepository;
+    private final UserRepository userRepository;
+    private final TokenBlacklistRepository blacklistRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtil jwtUtil;
 
-    public User register(String username, String password, Set<String> roles) {
-        User user = new User();
-        user.setUsername(username);
-        user.setPassword(passwordEncoder.encode(password));
-        user.setRoles(roles);
-        return userRepository.save(user);
+    public AuthService(UserRepository userRepository, TokenBlacklistRepository blacklistRepository,
+                       PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager,
+                       JwtUtil jwtUtil) {
+        this.userRepository = userRepository;
+        this.blacklistRepository = blacklistRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.authenticationManager = authenticationManager;
+        this.jwtUtil = jwtUtil;
     }
 
-    public LoginResponse login(LoginRequest request) {
-        User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        if (passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            String token = jwtUtil.generateToken(user.getUsername(), user.getRoles());
-            return new LoginResponse(token, user.getUsername());
+    public void register(UserDTO userDTO, String[] roles) {
+        if (userRepository.findByUsername(userDTO.getUsername()).isPresent()) {
+            throw new ApiException("Username already exists", 400);
         }
-        throw new RuntimeException("Invalid credentials");
+        User user = new User();
+        user.setUsername(userDTO.getUsername());
+        user.setPasswordHash(passwordEncoder.encode(userDTO.getPassword()));
+        user.setRoles(Arrays.stream(roles).map(r -> r.toUpperCase()).toArray(String[]::new));
+        userRepository.save(user);
+    }
+
+    public String login(@Valid UserDTO userDTO) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(userDTO.getUsername(), userDTO.getPassword()));
+        User user = userRepository.findByUsername(userDTO.getUsername())
+                .orElseThrow(() -> new ApiException("User not found", 404));
+        return jwtUtil.generateToken(userDTO.getUsername(), Arrays.asList(user.getRoles()));
     }
 
     public void logout(String token) {
+        String jwt = token.replace("Bearer ", "");
+        if (blacklistRepository.findByToken(jwt).isPresent()) {
+            throw new ApiException("Token already blacklisted", 400);
+        }
         TokenBlacklist blacklist = new TokenBlacklist();
-        blacklist.setToken(token);
-        blacklist.setBlacklistedAt(LocalDateTime.now());
-        tokenBlacklistRepository.save(blacklist);
-    }
-
-    public boolean isTokenBlacklisted(String token) {
-
-        return tokenBlacklistRepository.existsByToken(token);
+        blacklist.setToken(jwt);
+        blacklist.setExpiryDate(LocalDateTime.now().plusHours(24));
+        blacklistRepository.save(blacklist);
     }
 }

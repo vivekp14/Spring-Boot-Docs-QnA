@@ -31,17 +31,11 @@ public class DocumentService {
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
-    /**
-     * Initiates document ingestion by sending to RabbitMQ queue.
-     */
     public void ingestDocument(DocumentDTO dto) {
         LOGGER.info("Queueing document for ingestion: {}", dto.getTitle());
         rabbitTemplate.convertAndSend(RabbitMQConfig.DOCUMENT_QUEUE, dto);
     }
 
-    /**
-     * Processes a single document with retry logic.
-     */
     @Async
     @Transactional
     @Retryable(value = DocumentProcessingException.class, maxAttempts = 3, backoff = @Backoff(delay = 1000, multiplier = 2))
@@ -56,7 +50,7 @@ public class DocumentService {
             document.setKeywords(dto.getKeywords());
             document.setCreatedAt(LocalDateTime.now());
             documentRepository.save(document);
-            // Update tsvector after saving
+            // Updating tsvector after saving
             documentRepository.updateSearchVectors();
         } catch (Exception e) {
             LOGGER.error("Failed to process document: {}", dto.getTitle(), e);
